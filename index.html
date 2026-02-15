@@ -1,53 +1,824 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TradeMind Pro Trading Journal</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>TradeMind Pro - Complete Trading Journal</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+```
+    :root {
+        --bg-primary: #0f172a;
+        --bg-secondary: #1e293b;
+        --bg-card: rgba(30, 41, 59, 0.6);
+        --border-color: rgba(255, 255, 255, 0.1);
+        --text-primary: #f1f5f9;
+        --text-secondary: #94a3b8;
+    }
+
+    [data-theme="light"] {
+        --bg-primary: #ffffff;
+        --bg-secondary: #f1f5f9;
+        --bg-card: rgba(255, 255, 255, 0.95);
+        --border-color: rgba(0, 0, 0, 0.15);
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
+    }
+    
+    body {
+        font-family: 'DM Sans', sans-serif;
+        background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-primary) 100%);
+        background-attachment: fixed;
+        color: var(--text-primary);
+        overflow-x: hidden;
+        transition: all 0.3s;
+    }
+
+    [data-theme="light"] body {
+        background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 50%, #f8fafc 100%);
+    }
+
+    h1, h2, h3, h4, h5, h6 { font-family: 'Syne', sans-serif; }
+
+    .glass-card {
+        background: var(--bg-card); 
+        backdrop-filter: blur(20px); 
+        border: 1px solid var(--border-color);
+        border-radius: 20px; 
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15); 
+        transition: all 0.3s;
+    }
+
+    [data-theme="light"] .glass-card {
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        border: none; padding: 12px 24px; border-radius: 12px; font-weight: 600;
+        color: white; cursor: pointer; transition: all 0.3s;
+    }
+
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4); }
+
+    .btn-danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        border: none; padding: 12px 24px; border-radius: 12px; font-weight: 600;
+        color: white; cursor: pointer; transition: all 0.3s;
+    }
+
+    .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4); }
+
+    .stat-card { animation: slideInUp 0.5s ease-out; }
+    @keyframes slideInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+    .notification { animation: slideInRight 0.4s ease-out; }
+    @keyframes slideInRight { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
+
+    .calendar-cell {
+        aspect-ratio: 1; transition: all 0.3s; cursor: pointer; border-radius: 12px;
+        position: relative; overflow: hidden; min-height: 90px;
+    }
+    .calendar-cell:hover { transform: scale(1.05) translateY(-4px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); z-index: 10; }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: rgba(30, 41, 59, 0.3); }
+    ::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.5); border-radius: 4px; }
+
+    .input-field {
+        background: var(--bg-card); border: 1px solid var(--border-color);
+        border-radius: 12px; padding: 12px; color: var(--text-primary); width: 100%;
+    }
+    .input-field:focus { outline: none; border-color: #6366f1; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1); }
+
+    .tab-active { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; }
+    .tab-inactive { 
+        background: rgba(99, 102, 241, 0.1); 
+        color: var(--text-secondary); 
+    }
+
+    [data-theme="light"] .tab-inactive { 
+        background: rgba(99, 102, 241, 0.08); 
+        color: #64748b;
+        border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    .theme-toggle {
+        background: var(--bg-card); border: 1px solid var(--border-color);
+        padding: 8px 16px; border-radius: 12px; cursor: pointer; transition: all 0.3s;
+    }
+    .theme-toggle:hover { background: rgba(99, 102, 241, 0.1); }
+
+    .mood-emoji {
+        font-size: 2rem; cursor: pointer; transition: all 0.3s; display: inline-block;
+        padding: 8px; border-radius: 12px;
+    }
+    .mood-emoji:hover { transform: scale(1.2); background: rgba(99, 102, 241, 0.1); }
+    .mood-emoji.selected { background: rgba(99, 102, 241, 0.3); transform: scale(1.1); }
+
+    [data-theme="light"] {
+        --chart-grid: rgba(0, 0, 0, 0.1);
+        --chart-text: #475569;
+    }
+    
+    :root {
+        --chart-grid: rgba(255, 255, 255, 0.1);
+        --chart-text: #94a3b8;
+    }
+</style>
+```
+
 </head>
 <body>
-    <header>
-        <h1>TradeMind Pro Trading Journal</h1>
-    </header>
-    <main>
-        <section id="journal">
-            <h2>Your Trades</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Trade</th>
-                        <th>Amount</th>
-                        <th>Result</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Trade entries will be populated here -->
-                </tbody>
-            </table>
-        </section>
-        <section id="new-trade">
-            <h2>Add New Trade</h2>
-            <form id="trade-form">
-                <label for="date">Date:</label>
-                <input type="date" id="date" name="date" required>
-                <label for="trade">Trade:</label>
-                <input type="text" id="trade" name="trade" required>
-                <label for="amount">Amount:</label>
-                <input type="number" id="amount" name="amount" required>
-                <label for="result">Result:</label>
-                <select id="result" name="result" required>
-                    <option value="win">Win</option>
-                    <option value="loss">Loss</option>
-                </select>
-                <button type="submit">Add Trade</button>
-            </form>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2026 TradeMind Pro. All rights reserved.</p>
-    </footer>
-    <script src="script.js"></script>
+    <div id="root"></div>
+
+```
+<script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const formatCurrency = (value) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+    const formatPercent = (value) => `${value >= 0 ? '+' : ''}${value.toFixed(2)}%`;
+    const formatDate = (date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+    const calculateRMultiple = (pnl, initialRisk) => !initialRisk ? 0 : pnl / Math.abs(initialRisk);
+    
+    const calculateExpectancy = (trades) => {
+        if (!trades.length) return 0;
+        const wins = trades.filter(t => (t.pnl || 0) > 0);
+        const losses = trades.filter(t => (t.pnl || 0) < 0);
+        const winRate = wins.length / trades.length;
+        const avgWin = wins.length > 0 ? wins.reduce((sum, t) => sum + t.pnl, 0) / wins.length : 0;
+        const avgLoss = losses.length > 0 ? Math.abs(losses.reduce((sum, t) => sum + t.pnl, 0) / losses.length) : 0;
+        return (winRate * avgWin) - ((1 - winRate) * avgLoss);
+    };
+
+    const calculateProfitFactor = (trades) => {
+        const grossProfit = trades.filter(t => (t.pnl || 0) > 0).reduce((sum, t) => sum + t.pnl, 0);
+        const grossLoss = Math.abs(trades.filter(t => (t.pnl || 0) < 0).reduce((sum, t) => sum + t.pnl, 0));
+        return grossLoss === 0 ? (grossProfit > 0 ? 999 : 0) : grossProfit / grossLoss;
+    };
+
+    const getInitialData = () => {
+        const stored = localStorage.getItem('tradeMindFinalPerfect');
+        if (stored) return JSON.parse(stored);
+        
+        const sampleData = {
+            accounts: [
+                { 
+                    id: '1', 
+                    name: 'Funded 50K', 
+                    size: 50000, 
+                    initialBalance: 50000, 
+                    color: '#10b981', 
+                    phase: 'funded',
+                    dailyLossLimit: 5,
+                    maxDrawdown: 10
+                }
+            ],
+            activeAccountId: '1',
+            trades: {},
+            activeTrades: {},
+            journals: {},
+            rules: { dailyMaxLoss: 2, dailyProfitCap: 4, maxTradesPerDay: 5, maxRiskPerTrade: 1 },
+            theme: 'dark'
+        };
+
+        // Generate sample trades with realistic equity curve
+        const accountId = '1';
+        const now = Date.now();
+        const oneDay = 24 * 60 * 60 * 1000;
+        let runningEquity = 50000;
+
+        for (let i = 0; i < 50; i++) {
+            const daysAgo = 49 - i;
+            const timestamp = new Date(now - (daysAgo * oneDay)).toISOString();
+            const dateKey = timestamp.split('T')[0];
+            
+            const isWin = Math.random() > 0.38;
+            const pnl = isWin ? (100 + Math.random() * 400) : -(80 + Math.random() * 300);
+            runningEquity += pnl;
+
+            const trade = {
+                id: `sample-${i}`,
+                accountId,
+                date: dateKey,
+                timestamp,
+                instrument: ['EUR/USD', 'GBP/USD', 'GOLD'][Math.floor(Math.random() * 3)],
+                direction: Math.random() > 0.5 ? 'BUY' : 'SELL',
+                pnl,
+                initialRisk: 100,
+                rMultiple: pnl / 100,
+                outcome: isWin ? 'WIN' : 'LOSS',
+                strategy: ['Breakout', 'Pullback'][Math.floor(Math.random() * 2)],
+                followedPlan: Math.random() > 0.2,
+                runningEquity // Store for chart
+            };
+
+            if (!sampleData.trades[accountId]) sampleData.trades[accountId] = {};
+            if (!sampleData.trades[accountId][dateKey]) sampleData.trades[accountId][dateKey] = [];
+            sampleData.trades[accountId][dateKey].push(trade);
+        }
+
+        return sampleData;
+    };
+
+    const TradingJournalApp = () => {
+        const [data, setData] = useState(getInitialData());
+        const [currentPage, setCurrentPage] = useState('dashboard');
+        const [notifications, setNotifications] = useState([]);
+        const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+        useEffect(() => {
+            document.documentElement.setAttribute('data-theme', data.theme || 'dark');
+            localStorage.setItem('tradeMindFinalPerfect', JSON.stringify(data));
+        }, [data]);
+
+        const addNotification = (message, type = 'info') => {
+            const id = Date.now();
+            setNotifications(prev => [...prev, { id, message, type }]);
+            setTimeout(() => setNotifications(prev => prev.filter(n => n.id !== id)), 5000);
+        };
+
+        const updateData = (updates) => setData(prev => ({ ...prev, ...updates }));
+
+        const toggleTheme = () => {
+            const newTheme = data.theme === 'dark' ? 'light' : 'dark';
+            updateData({ theme: newTheme });
+            addNotification(`${newTheme === 'dark' ? '🌙' : '☀️'} Theme changed!`, 'success');
+        };
+
+        const pages = [
+            { id: 'dashboard', icon: '📊', label: 'Dashboard' },
+            { id: 'calendar', icon: '📅', label: 'Calendar' },
+            { id: 'journal', icon: '📓', label: 'Journal' },
+            { id: 'profile', icon: '👤', label: 'Profile' }
+        ];
+
+        return (
+            <div className="min-h-screen relative z-10">
+                <div className="fixed top-4 right-4 z-50 space-y-2 max-w-sm">
+                    {notifications.map(notif => (
+                        <div key={notif.id} className={`notification px-6 py-4 rounded-2xl shadow-2xl font-semibold ${
+                            notif.type === 'success' ? 'bg-gradient-to-r from-green-500 to-emerald-600' :
+                            notif.type === 'error' ? 'bg-gradient-to-r from-red-500 to-rose-600' :
+                            'bg-gradient-to-r from-blue-500 to-indigo-600'
+                        } text-white backdrop-blur-lg`}>
+                            {notif.message}
+                        </div>
+                    ))}
+                </div>
+
+                <header className="sticky top-0 z-40 backdrop-blur-xl" style={{background: 'var(--bg-card)', borderBottom: '1px solid var(--border-color)'}}>
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+                        <div className="flex justify-between items-center mb-4">
+                            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                                TradeMind Pro
+                            </h1>
+                            <div className="flex items-center gap-3">
+                                <select 
+                                    value={data.activeAccountId}
+                                    onChange={(e) => updateData({ activeAccountId: e.target.value })}
+                                    className="input-field text-sm font-semibold px-3 py-2"
+                                >
+                                    {data.accounts.map(acc => (
+                                        <option key={acc.id} value={acc.id}>
+                                            {acc.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                <button onClick={toggleTheme} className="theme-toggle flex items-center gap-2">
+                                    {data.theme === 'dark' ? '☀️' : '🌙'}
+                                </button>
+                                <button 
+                                    className="md:hidden px-4 py-2 rounded-xl"
+                                    style={{background: 'var(--bg-card)'}}
+                                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                                >
+                                    ☰
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="hidden md:flex space-x-2 overflow-x-auto pb-2">
+                            {pages.map(page => (
+                                <button
+                                    key={page.id}
+                                    onClick={() => setCurrentPage(page.id)}
+                                    className={`px-5 py-2.5 rounded-xl font-semibold transition-all whitespace-nowrap ${
+                                        currentPage === page.id ? 'tab-active shadow-lg' : 'tab-inactive hover:opacity-80'
+                                    }`}
+                                >
+                                    {page.icon} {page.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        {mobileMenuOpen && (
+                            <div className="md:hidden mt-4 grid grid-cols-2 gap-2">
+                                {pages.map(page => (
+                                    <button
+                                        key={page.id}
+                                        onClick={() => { setCurrentPage(page.id); setMobileMenuOpen(false); }}
+                                        className={`px-4 py-3 rounded-xl font-semibold ${
+                                            currentPage === page.id ? 'tab-active' : 'tab-inactive'
+                                        }`}
+                                    >
+                                        {page.icon} {page.label}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </header>
+
+                <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+                    {currentPage === 'dashboard' && <Dashboard data={data} />}
+                    {currentPage === 'calendar' && <CalendarPage data={data} updateData={updateData} addNotification={addNotification} />}
+                    {currentPage === 'journal' && <JournalPage data={data} />}
+                    {currentPage === 'profile' && <ProfilePage data={data} updateData={updateData} addNotification={addNotification} />}
+                </main>
+            </div>
+        );
+    };
+
+    // Dashboard with Equity Chart and Drawdown Lines
+    const Dashboard = ({ data }) => {
+        const accountId = data.activeAccountId;
+        const account = data.accounts.find(a => a.id === accountId);
+        const accountTrades = data.trades[accountId] || {};
+        const allTrades = Object.values(accountTrades).flat().sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+        const totalPnL = allTrades.reduce((sum, t) => sum + (t.pnl || 0), 0);
+        const wins = allTrades.filter(t => (t.pnl || 0) > 0).length;
+        const losses = allTrades.filter(t => (t.pnl || 0) < 0).length;
+        const winRate = allTrades.length > 0 ? (wins / allTrades.length) * 100 : 0;
+
+        const chartRef = useRef(null);
+
+        useEffect(() => {
+            if (!chartRef.current || allTrades.length === 0 || !account) return;
+            
+            const ctx = chartRef.current.getContext('2d');
+            const existingChart = Chart.getChart(ctx);
+            if (existingChart) existingChart.destroy();
+
+            const initialBalance = account.initialBalance || account.size;
+            const dailyLossLimit = account.dailyLossLimit || 5;
+            const maxDrawdown = account.maxDrawdown || 10;
+
+            // Calculate daily drawdown line
+            const dailyDrawdownValue = initialBalance * (1 - dailyLossLimit / 100);
+            // Calculate max drawdown line
+            const maxDrawdownValue = initialBalance * (1 - maxDrawdown / 100);
+
+            // Prepare equity data
+            const equityData = allTrades.map((trade, index) => ({
+                x: new Date(trade.timestamp),
+                y: trade.runningEquity || (initialBalance + allTrades.slice(0, index + 1).reduce((sum, t) => sum + (t.pnl || 0), 0))
+            }));
+
+            // Add initial point
+            equityData.unshift({ x: new Date(allTrades[0].timestamp - 86400000), y: initialBalance });
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Account Equity',
+                            data: equityData,
+                            borderColor: '#6366f1',
+                            backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.1,
+                            fill: true,
+                            pointRadius: 0,
+                            pointHoverRadius: 6
+                        },
+                        {
+                            label: `Daily Loss Limit (${dailyLossLimit}%)`,
+                            data: [
+                                { x: equityData[0].x, y: dailyDrawdownValue },
+                                { x: equityData[equityData.length - 1].x, y: dailyDrawdownValue }
+                            ],
+                            borderColor: '#f59e0b',
+                            borderWidth: 2,
+                            borderDash: [10, 5],
+                            pointRadius: 0,
+                            fill: false
+                        },
+                        {
+                            label: `Max Drawdown (${maxDrawdown}%)`,
+                            data: [
+                                { x: equityData[0].x, y: maxDrawdownValue },
+                                { x: equityData[equityData.length - 1].x, y: maxDrawdownValue }
+                            ],
+                            borderColor: '#ef4444',
+                            borderWidth: 2,
+                            borderDash: [10, 5],
+                            pointRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        legend: { 
+                            labels: { 
+                                color: 'var(--chart-text)',
+                                font: { size: 12, weight: 'bold' }
+                            } 
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + formatCurrency(context.parsed.y);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: { unit: 'day' },
+                            ticks: { color: 'var(--chart-text)' },
+                            grid: { color: 'var(--chart-grid)' },
+                            title: { display: true, text: 'Date', color: 'var(--chart-text)' }
+                        },
+                        y: {
+                            ticks: { 
+                                color: 'var(--chart-text)',
+                                callback: function(value) {
+                                    return '$' + (value / 1000).toFixed(1) + 'k';
+                                }
+                            },
+                            grid: { color: 'var(--chart-grid)' },
+                            title: { display: true, text: 'Equity ($)', color: 'var(--chart-text)' }
+                        }
+                    }
+                }
+            });
+        }, [allTrades, account, data.theme]);
+
+        return (
+            <div className="space-y-6">
+                <div className="glass-card p-6 sm:p-8">
+                    <h2 className="text-2xl sm:text-3xl font-bold mb-6">Performance Overview</h2>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                        <div className="p-4 sm:p-6 rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 border border-blue-500/30 stat-card">
+                            <p className="text-xs sm:text-sm text-blue-300 mb-2">Total P/L</p>
+                            <p className={`text-xl sm:text-3xl font-bold ${totalPnL >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                                {formatCurrency(totalPnL)}
+                            </p>
+                            <p className="text-xs mt-2" style={{color: 'var(--text-secondary)'}}>{allTrades.length} trades</p>
+                        </div>
+
+                        <div className="p-4 sm:p-6 rounded-xl bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 stat-card" style={{animationDelay: '0.1s'}}>
+                            <p className="text-xs sm:text-sm text-green-300 mb-2">Win Rate</p>
+                            <p className="text-xl sm:text-3xl font-bold text-white">{winRate.toFixed(1)}%</p>
+                            <p className="text-xs mt-2" style={{color: 'var(--text-secondary)'}}>{wins}W / {losses}L</p>
+                        </div>
+
+                        <div className="p-4 sm:p-6 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 stat-card" style={{animationDelay: '0.2s'}}>
+                            <p className="text-xs sm:text-sm text-purple-300 mb-2">Profit Factor</p>
+                            <p className="text-xl sm:text-3xl font-bold text-white">{calculateProfitFactor(allTrades).toFixed(2)}</p>
+                        </div>
+
+                        <div className="p-4 sm:p-6 rounded-xl bg-gradient-to-br from-orange-500/20 to-red-500/20 border border-orange-500/30 stat-card" style={{animationDelay: '0.3s'}}>
+                            <p className="text-xs sm:text-sm text-orange-300 mb-2">Expectancy</p>
+                            <p className="text-xl sm:text-3xl font-bold text-white">{formatCurrency(calculateExpectancy(allTrades))}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="glass-card p-6 sm:p-8">
+                    <h3 className="text-xl font-bold mb-4">Equity Curve with Drawdown Limits</h3>
+                    <div style={{ height: '400px', position: 'relative' }}>
+                        <canvas ref={chartRef}></canvas>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    // Calendar (simplified)
+    const CalendarPage = ({ data, updateData, addNotification }) => {
+        return (
+            <div className="glass-card p-8 text-center">
+                <h2 className="text-3xl font-bold mb-4">📅 Calendar</h2>
+                <p style={{color: 'var(--text-secondary)'}}>Calendar with journal integration</p>
+            </div>
+        );
+    };
+
+    // Journal (simplified)
+    const JournalPage = ({ data }) => {
+        const accountId = data.activeAccountId;
+        const accountJournals = data.journals[accountId] || {};
+        const journalEntries = Object.keys(accountJournals).sort((a, b) => new Date(b) - new Date(a));
+
+        return (
+            <div className="glass-card p-6 sm:p-8">
+                <h2 className="text-2xl sm:text-3xl font-bold mb-6">Trading Journal</h2>
+                {journalEntries.length === 0 ? (
+                    <div className="text-center py-12">
+                        <div className="text-6xl mb-4">📓</div>
+                        <p className="text-xl" style={{color: 'var(--text-secondary)'}}>No journal entries yet</p>
+                    </div>
+                ) : (
+                    <div className="space-y-4">
+                        {journalEntries.map(dateKey => {
+                            const entry = accountJournals[dateKey];
+                            const moodEmojis = { great: '😄', good: '😊', neutral: '😐', bad: '😞', terrible: '😡' };
+                            return (
+                                <div key={dateKey} className="p-6 rounded-xl" style={{background: 'rgba(99, 102, 241, 0.1)', border: '1px solid var(--border-color)'}}>
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div>
+                                            <h3 className="text-xl font-bold">{formatDate(dateKey)}</h3>
+                                            <span className="text-2xl">{moodEmojis[entry.mood]}</span>
+                                        </div>
+                                    </div>
+                                    <p style={{color: 'var(--text-secondary)'}}>{entry.text}</p>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    // Profile Page with Account Management
+    const ProfilePage = ({ data, updateData, addNotification }) => {
+        const [isEditing, setIsEditing] = useState(null);
+        const [editForm, setEditForm] = useState({ 
+            name: '', 
+            size: '', 
+            phase: 'demo',
+            dailyLossLimit: 5,
+            maxDrawdown: 10
+        });
+        const [isAdding, setIsAdding] = useState(false);
+        const [newAccount, setNewAccount] = useState({ 
+            name: '', 
+            size: '', 
+            phase: 'demo',
+            dailyLossLimit: 5,
+            maxDrawdown: 10
+        });
+
+        const handleEdit = (account) => {
+            setIsEditing(account.id);
+            setEditForm({ 
+                name: account.name, 
+                size: account.size,
+                phase: account.phase || 'demo',
+                dailyLossLimit: account.dailyLossLimit || 5,
+                maxDrawdown: account.maxDrawdown || 10
+            });
+        };
+
+        const handleSaveEdit = () => {
+            const accounts = data.accounts.map(acc => 
+                acc.id === isEditing ? { 
+                    ...acc, 
+                    name: editForm.name, 
+                    size: parseFloat(editForm.size),
+                    phase: editForm.phase,
+                    dailyLossLimit: parseFloat(editForm.dailyLossLimit),
+                    maxDrawdown: parseFloat(editForm.maxDrawdown)
+                } : acc
+            );
+            updateData({ accounts });
+            setIsEditing(null);
+            addNotification('Account updated! ✓', 'success');
+        };
+
+        const handleAdd = () => {
+            if (!newAccount.name || !newAccount.size) {
+                addNotification('Please fill all fields', 'error');
+                return;
+            }
+            const newAcc = {
+                id: Date.now().toString(),
+                name: newAccount.name,
+                size: parseFloat(newAccount.size),
+                initialBalance: parseFloat(newAccount.size),
+                color: '#6366f1',
+                phase: newAccount.phase,
+                dailyLossLimit: parseFloat(newAccount.dailyLossLimit),
+                maxDrawdown: parseFloat(newAccount.maxDrawdown)
+            };
+            updateData({ accounts: [...data.accounts, newAcc] });
+            setNewAccount({ name: '', size: '', phase: 'demo', dailyLossLimit: 5, maxDrawdown: 10 });
+            setIsAdding(false);
+            addNotification('Account created! 🎉', 'success');
+        };
+
+        const handleDelete = (accountId) => {
+            if (data.accounts.length === 1) {
+                addNotification('Cannot delete last account!', 'error');
+                return;
+            }
+            if (!confirm('Are you sure you want to delete this account? All trades will be lost.')) return;
+            
+            const accounts = data.accounts.filter(acc => acc.id !== accountId);
+            const newActiveId = data.activeAccountId === accountId ? accounts[0].id : data.activeAccountId;
+            updateData({ accounts, activeAccountId: newActiveId });
+            addNotification('Account deleted!', 'success');
+        };
+
+        return (
+            <div className="glass-card p-6 sm:p-8">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <h2 className="text-2xl sm:text-3xl font-bold">Trading Accounts</h2>
+                    <button onClick={() => setIsAdding(true)} className="btn-primary w-full sm:w-auto">
+                        + Add Account
+                    </button>
+                </div>
+
+                {isAdding && (
+                    <div className="mb-6 p-6 rounded-xl bg-gradient-to-br from-indigo-500/10 to-purple-500/10" style={{border: '1px solid rgba(99, 102, 241, 0.3)'}}>
+                        <h3 className="font-bold text-xl mb-4">New Account</h3>
+                        <div className="space-y-4">
+                            <input
+                                type="text"
+                                placeholder="Account Name"
+                                value={newAccount.name}
+                                onChange={(e) => setNewAccount({ ...newAccount, name: e.target.value })}
+                                className="input-field"
+                            />
+                            <input
+                                type="number"
+                                placeholder="Account Size ($)"
+                                value={newAccount.size}
+                                onChange={(e) => setNewAccount({ ...newAccount, size: e.target.value })}
+                                className="input-field"
+                            />
+                            <select
+                                value={newAccount.phase}
+                                onChange={(e) => setNewAccount({ ...newAccount, phase: e.target.value })}
+                                className="input-field"
+                            >
+                                <option value="demo">Demo</option>
+                                <option value="challenge">Challenge</option>
+                                <option value="funded">Funded</option>
+                            </select>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm font-semibold mb-2" style={{color: 'var(--text-secondary)'}}>Daily Loss Limit (%)</label>
+                                    <input
+                                        type="number"
+                                        value={newAccount.dailyLossLimit}
+                                        onChange={(e) => setNewAccount({ ...newAccount, dailyLossLimit: e.target.value })}
+                                        className="input-field"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-semibold mb-2" style={{color: 'var(--text-secondary)'}}>Max Drawdown (%)</label>
+                                    <input
+                                        type="number"
+                                        value={newAccount.maxDrawdown}
+                                        onChange={(e) => setNewAccount({ ...newAccount, maxDrawdown: e.target.value })}
+                                        className="input-field"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex gap-3">
+                                <button onClick={handleAdd} className="flex-1 btn-primary">Add</button>
+                                <button onClick={() => setIsAdding(false)} className="flex-1 px-6 py-3 rounded-xl font-semibold" style={{background: 'var(--bg-card)', border: '1px solid var(--border-color)'}}>
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                <div className="space-y-4">
+                    {data.accounts.map(account => (
+                        <div key={account.id} className={`p-6 rounded-xl ${
+                            account.id === data.activeAccountId 
+                                ? 'bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border-2 border-indigo-500/50' 
+                                : ''
+                        }`} style={{background: account.id === data.activeAccountId ? undefined : 'var(--bg-card)', border: account.id === data.activeAccountId ? undefined : '1px solid var(--border-color)'}}>
+                            {isEditing === account.id ? (
+                                <div className="space-y-4">
+                                    <input
+                                        type="text"
+                                        value={editForm.name}
+                                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                                        className="input-field"
+                                    />
+                                    <input
+                                        type="number"
+                                        value={editForm.size}
+                                        onChange={(e) => setEditForm({ ...editForm, size: e.target.value })}
+                                        className="input-field"
+                                    />
+                                    <select
+                                        value={editForm.phase}
+                                        onChange={(e) => setEditForm({ ...editForm, phase: e.target.value })}
+                                        className="input-field"
+                                    >
+                                        <option value="demo">Demo</option>
+                                        <option value="challenge">Challenge</option>
+                                        <option value="funded">Funded</option>
+                                    </select>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-semibold mb-2" style={{color: 'var(--text-secondary)'}}>Daily Loss (%)</label>
+                                            <input
+                                                type="number"
+                                                value={editForm.dailyLossLimit}
+                                                onChange={(e) => setEditForm({ ...editForm, dailyLossLimit: e.target.value })}
+                                                className="input-field"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-semibold mb-2" style={{color: 'var(--text-secondary)'}}>Max DD (%)</label>
+                                            <input
+                                                type="number"
+                                                value={editForm.maxDrawdown}
+                                                onChange={(e) => setEditForm({ ...editForm, maxDrawdown: e.target.value })}
+                                                className="input-field"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <button onClick={handleSaveEdit} className="flex-1 btn-primary">Save</button>
+                                        <button onClick={() => setIsEditing(null)} className="flex-1 px-6 py-3 rounded-xl font-semibold" style={{background: 'var(--bg-card)', border: '1px solid var(--border-color)'}}>
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="flex flex-col sm:flex-row justify-between gap-4">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <h3 className="text-xl font-bold">{account.name}</h3>
+                                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                                                account.phase === 'funded' ? 'bg-green-500/20 text-green-400' :
+                                                account.phase === 'challenge' ? 'bg-blue-500/20 text-blue-400' :
+                                                'bg-gray-500/20 text-gray-400'
+                                            }`}>
+                                                {account.phase?.toUpperCase() || 'DEMO'}
+                                            </span>
+                                        </div>
+                                        <p className="text-2xl font-bold text-indigo-400 mt-1">{formatCurrency(account.size)}</p>
+                                        <p className="text-sm mt-2" style={{color: 'var(--text-secondary)'}}>
+                                            Daily: {account.dailyLossLimit}% | Max DD: {account.maxDrawdown}%
+                                        </p>
+                                        {account.id === data.activeAccountId && (
+                                            <span className="inline-block mt-2 px-3 py-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white text-xs rounded-full font-bold">
+                                                ✓ Active
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="flex flex-col gap-2">
+                                        {account.id !== data.activeAccountId && (
+                                            <button
+                                                onClick={() => updateData({ activeAccountId: account.id })}
+                                                className="px-4 py-2 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold hover:shadow-lg"
+                                            >
+                                                Set Active
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={() => handleEdit(account)}
+                                            className="px-4 py-2 rounded-xl font-semibold"
+                                            style={{background: 'var(--bg-card)', border: '1px solid var(--border-color)'}}
+                                        >
+                                            Edit
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(account.id)}
+                                            className="btn-danger"
+                                        >
+                                            Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    };
+
+    ReactDOM.render(<TradingJournalApp />, document.getElementById('root'));
+</script>
+```
+
 </body>
 </html>
