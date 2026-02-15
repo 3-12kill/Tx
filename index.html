@@ -3,21 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Updated Index</title>
-    <style>
-        :root {
-            --background-color: #ffffff; /* Change to light theme */
-            --text-color: #000000; /* Change text color for visibility */
-            /* Other CSS variables for light theme can go here */
-        }
-        body {
-            background: linear-gradient(to right, #f0f8ff, #b0e0e6); /* Adjusted gradient to be brighter */
-            color: var(--text-color);
-        }
-    </style>
+    <title>TradeMind Pro Trading Journal</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Welcome to the Updated Index Page</h1>
-    <p>This content is now visible and accessible!</p>
+    <header>
+        <h1>TradeMind Pro Trading Journal</h1>
+    </header>
+    <main>
+        <section id="journal">
+            <h2>Your Trades</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Trade</th>
+                        <th>Amount</th>
+                        <th>Result</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Trade entries will be populated here -->
+                </tbody>
+            </table>
+        </section>
+        <section id="new-trade">
+            <h2>Add New Trade</h2>
+            <form id="trade-form">
+                <label for="date">Date:</label>
+                <input type="date" id="date" name="date" required>
+                <label for="trade">Trade:</label>
+                <input type="text" id="trade" name="trade" required>
+                <label for="amount">Amount:</label>
+                <input type="number" id="amount" name="amount" required>
+                <label for="result">Result:</label>
+                <select id="result" name="result" required>
+                    <option value="win">Win</option>
+                    <option value="loss">Loss</option>
+                </select>
+                <button type="submit">Add Trade</button>
+            </form>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2026 TradeMind Pro. All rights reserved.</p>
+    </footer>
+    <script src="script.js"></script>
 </body>
 </html>
