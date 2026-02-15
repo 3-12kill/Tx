@@ -1,0 +1,2 @@
+# Tx
+TRADING JOURNAL
